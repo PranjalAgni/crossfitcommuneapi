@@ -5,7 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
    moduleFormat = "cjs"
    output = "../generated/prisma"
 }
@@ -32,6 +32,17 @@ enum MembershipStatus {
   CANCELLED
 }
 
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  REVOKED
+}
+
+enum InviteRole {
+  member
+  admin
+}
+
 model Profile {
   id            String        @id @db.Uuid
   email         String        @unique
@@ -45,4 +56,19 @@ model Profile {
   units         String?
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
+}
+
+model MemberInvite {
+  email       String       @id
+  role        InviteRole   @default(member)
+  status      InviteStatus @default(PENDING)
+
+  invitedAt   DateTime     @default(now())
+  expiresAt   DateTime?
+  acceptedAt  DateTime?
+
+  createdBy   String?      @db.Uuid  // admin who invited (optional)
+
+  @@index([status])
+  @@index([expiresAt])
 }

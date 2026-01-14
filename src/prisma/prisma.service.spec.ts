@@ -1,12 +1,26 @@
 import { Test, TestingModule } from "@nestjs/testing";
+import { ConfigService } from "@nestjs/config";
 import { PrismaService } from "./prisma.service";
 
 describe("PrismaService", () => {
   let service: PrismaService;
 
+  const mockConfigService = {
+    get: jest.fn((key: string) => {
+      if (key === "DATABASE_URL") return "postgresql://user:pass@localhost/db";
+      return undefined;
+    }),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [PrismaService],
+      providers: [
+        PrismaService,
+        {
+          provide: ConfigService,
+          useValue: mockConfigService,
+        },
+      ],
     }).compile();
 
     service = module.get<PrismaService>(PrismaService);
